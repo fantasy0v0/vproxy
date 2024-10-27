@@ -10,6 +10,7 @@ interface StorageKey<T>
 interface HttpServerConnection {
   fun base(): io.vproxy.base.connection.Connection
   fun response(status: Int): HttpServerResponse
+  fun onResponse(handler: ResponseHandler)
 }
 
 interface HttpHeaders {
@@ -55,6 +56,10 @@ class RoutingContext(
   init {
     val method = HttpMethod.valueOf(req.method())
     tree = routes[method]!!
+  }
+
+  fun onResponse(handler: ResponseHandler) {
+    conn.onResponse(handler)
   }
 
   fun <T> put(key: StorageKey<T>, value: T?) {
@@ -161,3 +166,5 @@ interface RoutingHandler {
 }
 
 typealias RoutingHandlerFunc = suspend (RoutingContext) -> Unit
+
+typealias ResponseHandler = suspend (HttpServerResponse) -> Unit
